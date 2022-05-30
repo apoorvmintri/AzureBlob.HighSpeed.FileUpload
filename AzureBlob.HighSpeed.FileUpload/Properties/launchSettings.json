@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "AzureBlob.HighSpeed.FileUpload": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7005",
+      "launchBrowser": false
+    }
+  }
+}
