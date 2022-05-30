@@ -7,6 +7,7 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace AzureBlob.HighSpeed.FileUpload
 {
@@ -18,13 +19,14 @@ namespace AzureBlob.HighSpeed.FileUpload
             ILogger log)
         {
             var context = new BlobContext();
+            var response = new List<string>();
 
             if (req.Form.Files.Count > 1)
-                await context.UploadBatch("upload-test", req.Form.Files);
+                response.AddRange(await context.UploadBatch("upload-test", req.Form.Files));
             else
-                await context.Upload("upload-test", req.Form.Files[0]);
+                response.Add(await context.Upload("upload-test", req.Form.Files[0]));
 
-            return new OkResult();
+            return new OkObjectResult(response);
         }
     }
 }

@@ -3,6 +3,7 @@ using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Blob;
 using Microsoft.Azure.Storage.DataMovement;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -45,17 +46,21 @@ namespace AzureBlob.HighSpeed.FileUpload
             return client;
         }
 
-        public async Task UploadBatch(string containerName, IFormFileCollection files)
+        public async Task<IEnumerable<string>> UploadBatch(string containerName, IFormFileCollection files)
         {
+            var uris = new ConcurrentBag<string>();
             _containerClient = await GetContainerClient(containerName);
 
             await Parallel.ForEachAsync(files, async (file, token) =>
             {
-                await Upload(containerName, file);
+                var uri = await Upload(containerName, file);
+                uris.Add(uri);
             });
+
+            return uris;
         }
 
-        public async Task Upload(string containerName, IFormFile file)
+        public async Task<string> Upload(string containerName, IFormFile file)
         {
             if (_containerClient == null)
                 _containerClient = await GetContainerClient(containerName);
@@ -69,6 +74,7 @@ namespace AzureBlob.HighSpeed.FileUpload
                 file.CopyTo(stream);
             }
             await TransferManager.UploadAsync(stream, blockBlob, null, _transferContext);
+            return blockBlob.Uri.ToString();
         }
 
         public async Task<bool> Delete(string containerName, string fileName)
