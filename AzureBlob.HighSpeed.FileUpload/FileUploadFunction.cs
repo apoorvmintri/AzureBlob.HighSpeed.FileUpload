@@ -18,7 +18,7 @@ namespace AzureBlob.HighSpeed.FileUpload
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "fast/upload")] HttpRequest req,
             ILogger log)
         {
-            var context = new BlobContext();
+            using var context = new BlobContext();
             var response = new List<string>();
 
             if (req.Form.Files.Count > 1)
