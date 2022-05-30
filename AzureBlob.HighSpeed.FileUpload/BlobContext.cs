@@ -45,6 +45,16 @@ namespace AzureBlob.HighSpeed.FileUpload
             return client;
         }
 
+        public async Task UploadBatch(string containerName, IFormFileCollection files)
+        {
+            _containerClient = await GetContainerClient(containerName);
+
+            await Parallel.ForEachAsync(files, async (file, token) =>
+            {
+                await Upload(containerName, file);
+            });
+        }
+
         public async Task Upload(string containerName, IFormFile file)
         {
             if (_containerClient == null)

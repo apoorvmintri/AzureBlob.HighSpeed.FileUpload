@@ -14,22 +14,17 @@ namespace AzureBlob.HighSpeed.FileUpload
     {
         [FunctionName("UploadFile")]
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "upload")] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "fast/upload")] HttpRequest req,
             ILogger log)
         {
-            log.LogInformation("C# HTTP trigger function processed a request.");
+            var context = new BlobContext();
 
-            string name = req.Query["name"];
+            if (req.Form.Files.Count > 1)
+                await context.UploadBatch("upload-test", req.Form.Files);
+            else
+                await context.Upload("upload-test", req.Form.Files[0]);
 
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            dynamic data = JsonConvert.DeserializeObject(requestBody);
-            name = name ?? data?.name;
-
-            string responseMessage = string.IsNullOrEmpty(name)
-                ? "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response."
-                : $"Hello, {name}. This HTTP triggered function executed successfully.";
-
-            return new OkObjectResult(responseMessage);
+            return new OkResult();
         }
     }
 }
