@@ -14,6 +14,7 @@ namespace AzureBlob.HighSpeed.FileUpload
 {
     public static class DetailsFunction
     {
+        [FunctionName("GetThreads")]
         public static IActionResult GetThreads(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "get/threads")] HttpRequest req,
             ILogger log)
